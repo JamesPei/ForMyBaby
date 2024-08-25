@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>static_resource/no-image.jpg</file>
+    </qresource>
+    <qresource prefix="/new/images"/>
+</RCC>
