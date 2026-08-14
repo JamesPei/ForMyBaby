@@ -2,361 +2,174 @@
 <ui version="4.0">
  <class>ForMyBaby</class>
  <widget class="QMainWindow" name="ForMyBaby">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>1280</width>
-    <height>800</height>
-   </rect>
-  </property>
-  <property name="minimumSize">
-   <size>
-    <width>0</width>
-    <height>0</height>
-   </size>
-  </property>
-  <property name="maximumSize">
-   <size>
-    <width>16777215</width>
-    <height>16777215</height>
-   </size>
-  </property>
-  <property name="windowTitle">
-   <string>MainWindow</string>
-  </property>
+  <property name="geometry"><rect><x>0</x><y>0</y><width>1280</width><height>800</height></rect></property>
+  <property name="minimumSize"><size><width>900</width><height>600</height></size></property>
+  <property name="windowTitle"><string>For My Baby</string></property>
   <widget class="QWidget" name="centralwidget">
-   <property name="minimumSize">
-    <size>
-     <width>0</width>
-     <height>0</height>
-    </size>
-   </property>
-   <property name="maximumSize">
-    <size>
-     <width>16777215</width>
-     <height>16777215</height>
-    </size>
-   </property>
-   <property name="autoFillBackground">
-    <bool>true</bool>
-   </property>
-   <widget class="QTabWidget" name="mainWidget">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>0</y>
-      <width>1260</width>
-      <height>880</height>
-     </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="minimumSize">
-     <size>
-      <width>0</width>
-      <height>0</height>
-     </size>
-    </property>
-    <property name="maximumSize">
-     <size>
-      <width>16777215</width>
-      <height>16777215</height>
-     </size>
-    </property>
-    <property name="currentIndex">
-     <number>0</number>
-    </property>
-    <widget class="QWidget" name="record_tab">
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <attribute name="title">
-      <string>Record</string>
-     </attribute>
-     <widget class="QWidget" name="horizontalLayoutWidget">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>1251</width>
-        <height>721</height>
-       </rect>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="2,1">
-       <property name="leftMargin">
-        <number>5</number>
-       </property>
-       <property name="topMargin">
-        <number>5</number>
-       </property>
-       <property name="rightMargin">
-        <number>5</number>
-       </property>
-       <property name="bottomMargin">
-        <number>5</number>
-       </property>
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
-         <property name="topMargin">
-          <number>5</number>
-         </property>
-         <property name="bottomMargin">
-          <number>5</number>
-         </property>
-         <item>
-          <widget class="QLabel" name="photo_window">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>1</horstretch>
-             <verstretch>1</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>Upload Photo</string>
-           </property>
-          </widget>
-         </item>
-         <item alignment="Qt::AlignHCenter">
-          <widget class="QPushButton" name="upload_button">
-           <property name="minimumSize">
-            <size>
-             <width>180</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>180</width>
-             <height>30</height>
-            </size>
-           </property>
-           <property name="layoutDirection">
-            <enum>Qt::LeftToRight</enum>
-           </property>
-           <property name="text">
-            <string>upload</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_3">
-         <item>
-          <widget class="QTextEdit" name="story">
-           <property name="placeholderText">
-            <string>故事</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QTextEdit" name="message">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="placeholderText">
-            <string>寄语</string>
-           </property>
-          </widget>
-         </item>
-         <item alignment="Qt::AlignHCenter">
-          <widget class="QDateTimeEdit" name="datetime">
-           <property name="minimumSize">
-            <size>
-             <width>180</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>320</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="dateTime">
-            <datetime>
-             <hour>0</hour>
-             <minute>0</minute>
-             <second>0</second>
-             <year>2023</year>
-             <month>1</month>
-             <day>1</day>
-            </datetime>
-           </property>
-          </widget>
-         </item>
-         <item alignment="Qt::AlignHCenter">
-          <widget class="QLineEdit" name="position">
-           <property name="minimumSize">
-            <size>
-             <width>180</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>320</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-           <property name="placeholderText">
-            <string>地点</string>
-           </property>
-          </widget>
-         </item>
-         <item alignment="Qt::AlignHCenter">
-          <widget class="QPushButton" name="clear_button">
-           <property name="minimumSize">
-            <size>
-             <width>180</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>180</width>
-             <height>30</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>clear</string>
-           </property>
-          </widget>
-         </item>
-         <item alignment="Qt::AlignHCenter">
-          <widget class="QPushButton" name="save_button">
-           <property name="minimumSize">
-            <size>
-             <width>180</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>180</width>
-             <height>30</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>save</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-      </layout>
+   <layout class="QVBoxLayout" name="centralLayout">
+    <property name="leftMargin"><number>12</number></property>
+    <property name="topMargin"><number>12</number></property>
+    <property name="rightMargin"><number>12</number></property>
+    <property name="bottomMargin"><number>12</number></property>
+    <item>
+     <widget class="QTabWidget" name="mainWidget">
+      <property name="currentIndex"><number>0</number></property>
+      <property name="documentMode"><bool>true</bool></property>
+      <widget class="QWidget" name="record_tab">
+       <attribute name="title"><string>记录</string></attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="2,1">
+        <property name="spacing"><number>16</number></property>
+        <property name="leftMargin"><number>12</number></property>
+        <property name="topMargin"><number>12</number></property>
+        <property name="rightMargin"><number>12</number></property>
+        <property name="bottomMargin"><number>12</number></property>
+        <item>
+         <widget class="QGroupBox" name="photoGroupBox">
+          <property name="title"><string>照片</string></property>
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <property name="spacing"><number>12</number></property>
+           <item>
+            <widget class="QLabel" name="photo_window">
+             <property name="sizePolicy"><sizepolicy hsizetype="Expanding" vsizetype="Expanding"><horstretch>1</horstretch><verstretch>1</verstretch></sizepolicy></property>
+             <property name="minimumSize"><size><width>480</width><height>320</height></size></property>
+             <property name="frameShape"><enum>QFrame::StyledPanel</enum></property>
+             <property name="frameShadow"><enum>QFrame::Sunken</enum></property>
+             <property name="text"><string>请选择一张照片</string></property>
+             <property name="alignment"><set>Qt::AlignCenter</set></property>
+             <property name="scaledContents"><bool>true</bool></property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="photoActionLayout">
+             <item><spacer name="photoLeftSpacer"><property name="orientation"><enum>Qt::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property></spacer></item>
+             <item>
+              <widget class="QPushButton" name="upload_button">
+               <property name="minimumSize"><size><width>160</width><height>36</height></size></property>
+               <property name="text"><string>选择照片…</string></property>
+              </widget>
+             </item>
+             <item><spacer name="photoRightSpacer"><property name="orientation"><enum>Qt::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property></spacer></item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="detailsGroupBox">
+          <property name="minimumSize"><size><width>300</width><height>0</height></size></property>
+          <property name="title"><string>成长记录</string></property>
+          <layout class="QVBoxLayout" name="verticalLayout_3" stretch="3,2,0,0,0">
+           <property name="spacing"><number>12</number></property>
+           <item>
+            <widget class="QTextEdit" name="story">
+             <property name="minimumSize"><size><width>0</width><height>150</height></size></property>
+             <property name="placeholderText"><string>记录今天发生的故事……</string></property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QTextEdit" name="message">
+             <property name="minimumSize"><size><width>0</width><height>100</height></size></property>
+             <property name="placeholderText"><string>写下想对宝贝说的话……</string></property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QFormLayout" name="metadataLayout">
+             <property name="horizontalSpacing"><number>12</number></property>
+             <property name="verticalSpacing"><number>10</number></property>
+             <property name="fieldGrowthPolicy"><enum>QFormLayout::AllNonFixedFieldsGrow</enum></property>
+             <item row="0" column="0"><widget class="QLabel" name="datetimeLabel"><property name="text"><string>时间</string></property></widget></item>
+             <item row="0" column="1">
+              <widget class="QDateTimeEdit" name="datetime">
+               <property name="minimumSize"><size><width>180</width><height>32</height></size></property>
+               <property name="calendarPopup"><bool>true</bool></property>
+               <property name="displayFormat"><string>yyyy-MM-dd HH:mm</string></property>
+               <property name="dateTime"><datetime><hour>0</hour><minute>0</minute><second>0</second><year>2023</year><month>1</month><day>1</day></datetime></property>
+              </widget>
+             </item>
+             <item row="1" column="0"><widget class="QLabel" name="positionLabel"><property name="text"><string>地点</string></property></widget></item>
+             <item row="1" column="1">
+              <widget class="QLineEdit" name="position">
+               <property name="minimumSize"><size><width>180</width><height>32</height></size></property>
+               <property name="placeholderText"><string>输入拍摄或记录地点</string></property>
+               <property name="clearButtonEnabled"><bool>true</bool></property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item><spacer name="detailsSpacer"><property name="orientation"><enum>Qt::Vertical</enum></property><property name="sizeHint" stdset="0"><size><width>20</width><height>12</height></size></property></spacer></item>
+           <item>
+            <layout class="QHBoxLayout" name="recordActionLayout">
+             <item><widget class="QPushButton" name="clear_button"><property name="minimumSize"><size><width>110</width><height>36</height></size></property><property name="text"><string>清空</string></property></widget></item>
+             <item><spacer name="actionSpacer"><property name="orientation"><enum>Qt::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property></spacer></item>
+             <item><widget class="QPushButton" name="save_button"><property name="minimumSize"><size><width>110</width><height>36</height></size></property><property name="text"><string>保存记录</string></property><property name="default"><bool>true</bool></property></widget></item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="memory_tab">
+       <attribute name="title"><string>回忆</string></attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,3">
+        <property name="spacing"><number>16</number></property>
+        <property name="leftMargin"><number>12</number></property>
+        <property name="topMargin"><number>12</number></property>
+        <property name="rightMargin"><number>12</number></property>
+        <property name="bottomMargin"><number>12</number></property>
+        <item>
+         <widget class="QGroupBox" name="memoryListGroupBox">
+          <property name="minimumSize"><size><width>220</width><height>0</height></size></property>
+          <property name="title"><string>记录列表</string></property>
+          <layout class="QVBoxLayout" name="memoryListLayout">
+           <item><widget class="QListView" name="photo_list"><property name="alternatingRowColors"><bool>true</bool></property><property name="selectionMode"><enum>QAbstractItemView::SingleSelection</enum></property></widget></item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="memoryPreviewGroupBox">
+          <property name="title"><string>照片预览</string></property>
+          <layout class="QVBoxLayout" name="memoryPreviewLayout">
+           <item>
+            <widget class="QLabel" name="label">
+             <property name="minimumSize"><size><width>480</width><height>320</height></size></property>
+             <property name="frameShape"><enum>QFrame::StyledPanel</enum></property>
+             <property name="text"><string>从左侧选择一条记录</string></property>
+             <property name="alignment"><set>Qt::AlignCenter</set></property>
+             <property name="scaledContents"><bool>true</bool></property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_5">
+       <attribute name="title"><string>关于</string></attribute>
+       <layout class="QVBoxLayout" name="aboutLayout">
+        <item><spacer name="aboutTopSpacer"><property name="orientation"><enum>Qt::Vertical</enum></property><property name="sizeHint" stdset="0"><size><width>20</width><height>40</height></size></property></spacer></item>
+        <item alignment="Qt::AlignHCenter"><widget class="QLabel" name="aboutTitleLabel"><property name="font"><font><pointsize>18</pointsize><bold>true</bold></font></property><property name="text"><string>For My Baby</string></property><property name="alignment"><set>Qt::AlignCenter</set></property></widget></item>
+        <item alignment="Qt::AlignHCenter"><widget class="QLabel" name="aboutDescriptionLabel"><property name="text"><string>珍藏照片、故事与成长中的每一个瞬间</string></property><property name="alignment"><set>Qt::AlignCenter</set></property></widget></item>
+        <item><spacer name="aboutBottomSpacer"><property name="orientation"><enum>Qt::Vertical</enum></property><property name="sizeHint" stdset="0"><size><width>20</width><height>40</height></size></property></spacer></item>
+       </layout>
+      </widget>
      </widget>
-    </widget>
-    <widget class="QWidget" name="memory_tab">
-     <attribute name="title">
-      <string>Memory</string>
-     </attribute>
-     <widget class="QWidget" name="horizontalLayoutWidget_2">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>0</y>
-        <width>1241</width>
-        <height>721</height>
-       </rect>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,6">
-       <item>
-        <widget class="QListView" name="photo_list"/>
-       </item>
-       <item>
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string>TextLabel</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </widget>
-    <widget class="QWidget" name="tab_5">
-     <attribute name="title">
-      <string>Page</string>
-     </attribute>
-    </widget>
-   </widget>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>1280</width>
-     <height>24</height>
-    </rect>
-   </property>
-   <widget class="QMenu" name="menuFile">
-    <property name="title">
-     <string>File</string>
-    </property>
-    <addaction name="actionOpen"/>
-   </widget>
+   <property name="geometry"><rect><x>0</x><y>0</y><width>1280</width><height>24</height></rect></property>
+   <widget class="QMenu" name="menuFile"><property name="title"><string>文件</string></property><addaction name="actionOpen"/></widget>
    <addaction name="menuFile"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionOpen">
-   <property name="text">
-    <string>Open</string>
-   </property>
-  </action>
+  <action name="actionOpen"><property name="text"><string>打开照片…</string></property><property name="shortcut"><string>Ctrl+O</string></property></action>
  </widget>
- <resources/>
+ <resources><include location="static_resource.qrc"/></resources>
  <connections>
   <connection>
-   <sender>upload_button</sender>
-   <signal>clicked()</signal>
-   <receiver>actionOpen</receiver>
-   <slot>trigger()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>632</x>
-     <y>515</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-   </hints>
+   <sender>upload_button</sender><signal>clicked()</signal><receiver>actionOpen</receiver><slot>trigger()</slot>
+   <hints><hint type="sourcelabel"><x>460</x><y>700</y></hint><hint type="destinationlabel"><x>-1</x><y>-1</y></hint></hints>
   </connection>
  </connections>
 </ui>
