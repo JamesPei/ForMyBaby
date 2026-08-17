@@ -1,5 +1,5 @@
 #include "mainwindow.h"
-#include "./ui_mainwindow.h"
+#include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -17,16 +17,21 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::openFile);
 }
 
+// 打开文件对话框，选择图片文件并显示在photo_window中
 void MainWindow::openFile()
 {
+    // 弹出文件选择对话框，仅允许选择jpg/jpeg/png格式的图片
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "", tr("Images (*.jpg *jpeg *.png)"));
     if (!fileName.isEmpty())
     {
         curr_fileName = fileName;
+        // 加载图片并缩放至 960x640，忽略原始宽高比
         QPixmap pixmap(fileName);
         QPixmap scaledPixmap = pixmap.scaled(960, 640, Qt::IgnoreAspectRatio);
+        // 将缩放后的图片显示在 photo_window 控件中
         ui->photo_window->setPixmap(scaledPixmap);
     }else{
+        // 用户未选择任何文件，弹出警告提示
         QMessageBox::warning(this, tr("Error"), tr("Not selelct any file"));
     }
 }
@@ -51,6 +56,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+// Qt会自动扫描MainWindow中所有符合on_<对象名>_<信号名>()命名规则的槽函数，并自动将它们与对应控件的信号连接
 void MainWindow::on_clear_button_clicked()
 {
     ui->message->clear();
@@ -65,6 +71,15 @@ void MainWindow::on_clear_button_clicked()
 
 void MainWindow::on_save_button_clicked()
 {
+    // 从UI控件中获取用户输入的数据
+    QString message = ui->message->toPlainText();
+    QString story = ui->story->toPlainText();
+    QString position = ui->position->text();
+    QString datetime = ui->datetime->dateTime().toString("yyyy-MM-dd HH:mm");
+    QString imagePath = curr_fileName;
 
+    utils.upload(imagePath, message, story, datetime, position);
+
+    // 将照片路径、消息、故事、时间、地点组合保存
+    // utils.combinePhoto(imagePath, message, story, datetime, position);
 }
-
