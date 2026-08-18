@@ -10,6 +10,15 @@
                 "isDefault": true
             },
             "problemMatcher": "$gcc"
+        },
+        {
+            "label": "mac-build",
+            "type": "shell",
+            "command": "cd ${workspaceFolder}/build && /opt/homebrew/bin/cmake .. && make -j$(sysctl -n hw.ncpu)",
+            "group": {
+                "kind": "build"
+            },
+            "problemMatcher": "$gcc"
         }
     ]
 }

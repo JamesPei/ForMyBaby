@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug ForMyBaby",
+            "name": "Debug On Linux",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/ForMyBaby",
@@ -21,6 +21,16 @@
             ],
             "preLaunchTask": "cmake-build",
             "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "Debug On Mac",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/ForMyBaby.app/Contents/MacOS/ForMyBaby",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "mac-build"
         }
     ]
 }
