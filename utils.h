@@ -8,15 +8,6 @@
 #include <QNetworkReply>
 #include "database.h"
 
-struct BabyRecord {
-    int id = -1;
-    QString cloudPhotoPath;
-    QString message;
-    QString story;
-    QString datetime;
-    QString location;
-};
-
 class Utils {
 public:
     Utils();
@@ -26,6 +17,8 @@ public:
 
     void getPhotoByID(u_int32_t id);
 
+    QPixmap getPhotoByURL(QString url);
+
     bool upload(QString file_path, QString message, QString memory, QString datetime, QString location);
 
     bool combinePhoto(QString file_path, QString message, QString memory, QString datetime, QString location);
@@ -34,6 +27,7 @@ public:
     QString upload2Ms(QString file_path);
     bool authenticateMs();
     bool isMsAuthenticated() const;
+    QPixmap getPhotoFromMs(QString url);
 
     // ─── Google Drive ──────────────────────────────────────────────
     QString upload2Google(QString file_path);

@@ -36,6 +36,12 @@ void Utils::getPhotoByID(u_int32_t id)
 {
 }
 
+QPixmap Utils::getPhotoByURL(QString url){
+    // if(url.startsWith("https://onedrive.live.com")){
+        return getPhotoFromMs(url);
+    // }
+}
+
 bool Utils::upload(QString file_path, QString message, QString memory, QString datetime, QString location)
 {
     QString onedrive_url = upload2Ms(file_path);
@@ -183,6 +189,7 @@ bool Utils::refreshMsToken()
     loop.exec();
 
     QJsonObject json = QJsonDocument::fromJson(reply->readAll()).object();
+    int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     reply->deleteLater();
 
     if (json.contains("access_token")) {
@@ -194,7 +201,14 @@ bool Utils::refreshMsToken()
         return true;
     }
 
-    qWarning() << "Utils[MS]: refreshMsToken failed";
+    qWarning() << "Utils[MS]: refreshMsToken failed, status:" << statusCode
+               << "error:" << json["error"].toString()
+               << "description:" << json["error_description"].toString();
+
+    // 清空已失效的 token，下次操作会触发重新认证
+    m_msAccessToken.clear();
+    m_msRefreshToken.clear();
+    saveMsTokens();
     return false;
 }
 
@@ -299,6 +313,128 @@ QString Utils::upload2Ms(QString file_path)
     }
 
     return cloud_url;
+}
+
+QPixmap Utils::getPhotoFromMs(QString url)
+{
+    // 从 OneDrive 分享链接中提取文件 ID
+    QUrl shareUrl(url);
+    QUrlQuery query(shareUrl);
+    QString itemId = query.queryItemValue("id");
+
+    if (itemId.isEmpty()) {
+        qWarning() << "Utils[MS]: Cannot extract item ID from URL:" << url;
+        return QPixmap();
+    }
+
+    // 确保有有效的 access token
+    qInfo() << "Utils[MS]: Download - accessToken empty?" << m_msAccessToken.isEmpty()
+            << "refreshToken empty?" << m_msRefreshToken.isEmpty();
+
+    if (m_msAccessToken.isEmpty()) {
+        if (!m_msRefreshToken.isEmpty()) {
+            qInfo() << "Utils[MS]: Download - trying refreshMsToken";
+            bool ok = refreshMsToken();
+            qInfo() << "Utils[MS]: Download - refreshMsToken result:" << ok
+                    << "accessToken now empty?" << m_msAccessToken.isEmpty();
+        }
+        if (m_msAccessToken.isEmpty()) {
+            qWarning() << "Utils[MS]: Not authenticated";
+            return QPixmap();
+        }
+    }
+
+    qInfo() << "Utils[MS]: Download - accessToken length:" << m_msAccessToken.length();
+
+    // 通过 Microsoft Graph API 下载文件内容
+    QString downloadUrl = QString("https://graph.microsoft.com/v1.0/me/drive/items/%1/content").arg(itemId);
+
+    QNetworkRequest request{QUrl(downloadUrl)};
+    request.setRawHeader("Authorization", ("Bearer " + m_msAccessToken).toUtf8());
+    // 不自动跟随重定向：Graph API 的 /content 端点返回 302，
+    // 自动跟随会丢失 Authorization 头导致 401
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
+                         QNetworkRequest::ManualRedirectPolicy);
+
+    QNetworkReply* reply = m_networkManager->get(request);
+    QEventLoop loop;
+    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+    loop.exec();
+
+    int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    QByteArray data = reply->readAll();
+
+    // 处理 302 重定向：Graph API 的 /content 端点返回重定向到预签名下载 URL
+    if (statusCode == 302) {
+        QString redirectUrl = reply->rawHeader("Location");
+        reply->deleteLater();
+        if (!redirectUrl.isEmpty()) {
+            qInfo() << "Utils[MS]: Following redirect to download";
+            QNetworkRequest redirectRequest{QUrl(redirectUrl)};
+            // 预签名 URL 不需要 Authorization 头
+            QNetworkReply* redirectReply = m_networkManager->get(redirectRequest);
+            QEventLoop redirectLoop;
+            QObject::connect(redirectReply, &QNetworkReply::finished, &redirectLoop, &QEventLoop::quit);
+            redirectLoop.exec();
+
+            statusCode = redirectReply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+            data = redirectReply->readAll();
+            redirectReply->deleteLater();
+        }
+    } else {
+        reply->deleteLater();
+    }
+
+    if (statusCode == 401) {
+        qInfo() << "Utils[MS]: Download - got 401, calling refreshMsToken";
+        if (refreshMsToken()) {
+            qInfo() << "Utils[MS]: Download - refreshMsToken succeeded, retrying";
+            QNetworkRequest retryRequest{QUrl(downloadUrl)};
+            retryRequest.setRawHeader("Authorization", ("Bearer " + m_msAccessToken).toUtf8());
+            retryRequest.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
+                                     QNetworkRequest::ManualRedirectPolicy);
+
+            QNetworkReply* retryReply = m_networkManager->get(retryRequest);
+            QEventLoop retryLoop;
+            QObject::connect(retryReply, &QNetworkReply::finished, &retryLoop, &QEventLoop::quit);
+            retryLoop.exec();
+
+            statusCode = retryReply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+            data = retryReply->readAll();
+
+            if (statusCode == 302) {
+                QString redirectUrl = retryReply->rawHeader("Location");
+                retryReply->deleteLater();
+                if (!redirectUrl.isEmpty()) {
+                    QNetworkRequest redirectRequest{QUrl(redirectUrl)};
+                    QNetworkReply* redirectReply = m_networkManager->get(redirectRequest);
+                    QEventLoop redirectLoop2;
+                    QObject::connect(redirectReply, &QNetworkReply::finished, &redirectLoop2, &QEventLoop::quit);
+                    redirectLoop2.exec();
+
+                    statusCode = redirectReply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+                    data = redirectReply->readAll();
+                    redirectReply->deleteLater();
+                }
+            } else {
+                retryReply->deleteLater();
+            }
+            qInfo() << "Utils[MS]: Download - retry status:" << statusCode;
+        } else {
+            qInfo() << "Utils[MS]: Download - refreshMsToken failed";
+        }
+    }
+
+    if (statusCode != 200) {
+        qWarning() << "Utils[MS]: Download failed, url:" << downloadUrl
+                   << "status:" << statusCode
+                   << "response:" << data;
+        return QPixmap();
+    }
+
+    QPixmap pixmap;
+    pixmap.loadFromData(data);
+    return pixmap;
 }
 
 // ===============================================================

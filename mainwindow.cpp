@@ -100,7 +100,7 @@ void MainWindow::on_save_button_clicked()
 void MainWindow::on_mainWidget_currentChanged(int index)
 {
     if (index == 1)
-    { // memory_tab 首次加载
+    { 
         if (!m_memoryTabLoaded)
         {
             m_memoryTabLoaded = true;
@@ -110,7 +110,18 @@ void MainWindow::on_mainWidget_currentChanged(int index)
         QStringList storyList;
         for (const auto &rec : Database::instance().getAllRecords())
         {
-            storyList << rec.datetime;
+            QString record_id = QString::number(rec.id) + "_" + rec.datetime;
+            qInfo() << record_id;
+
+            BabyRecord temp_record;
+            temp_record.cloudPhotoPath = rec.cloudPhotoPath;
+            temp_record.story = rec.story;
+            temp_record.message = rec.message;
+            temp_record.datetime = rec.datetime;
+            temp_record.location = rec.location; 
+
+            records.insert(record_id, temp_record);
+            storyList << record_id;
         }
 
         m_photoListModel->setStringList(storyList);
@@ -120,6 +131,12 @@ void MainWindow::on_mainWidget_currentChanged(int index)
 
 void MainWindow::on_photo_list_clicked(const QModelIndex &index)
 {
-    QString story = index.data().toString();  // 获取点击的 story 文本
-    qInfo() << "Clicked:" << story;
+    QString record_id = index.data().toString();
+    qInfo() << "Clicked:" << record_id;
+
+    BabyRecord record = records[record_id];
+    QString cloud_photo_path = record.cloudPhotoPath;
+    qInfo() << "cloud_photo_path:" << cloud_photo_path;
+    QPixmap photo = utils.getPhotoByURL(cloud_photo_path);
+    ui->photo_window2->setPixmap(photo);
 }
