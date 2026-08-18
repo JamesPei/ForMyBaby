@@ -5,6 +5,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QResizeEvent>
+#include <QStringListModel>
 #include "utils.h"
 
 QT_BEGIN_NAMESPACE
@@ -31,9 +32,16 @@ private slots:
 
     void on_save_button_clicked();
 
+    void on_mainWidget_currentChanged(int index);
+
+    void on_photo_list_clicked(const QModelIndex &index);
+
 private:
     Ui::ForMyBaby *ui;
     QString curr_fileName;
     Utils utils;
+    bool m_memoryTabLoaded = false;          // 标记 memory_tab 是否已加载过数据
+    QStringListModel* m_photoListModel = nullptr;  // photo_list 的数据模型
+    QHash<QString, >
 };
 #endif // MAINWINDOW_H

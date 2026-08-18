@@ -6,6 +6,16 @@
 #include <QFileSystemModel>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include "database.h"
+
+struct BabyRecord {
+    int id = -1;
+    QString cloudPhotoPath;
+    QString message;
+    QString story;
+    QString datetime;
+    QString location;
+};
 
 class Utils {
 public:
@@ -16,9 +26,9 @@ public:
 
     void getPhotoByID(u_int32_t id);
 
-    bool upload(QString file_path, QString message, QString memory, QString datetime, QString position);
+    bool upload(QString file_path, QString message, QString memory, QString datetime, QString location);
 
-    bool combinePhoto(QString file_path, QString message, QString memory, QString datetime, QString position);
+    bool combinePhoto(QString file_path, QString message, QString memory, QString datetime, QString location);
 
     // ─── OneDrive (Microsoft Graph API) ────────────────────────────
     QString upload2Ms(QString file_path);
@@ -32,16 +42,20 @@ public:
 
 private:
     // ─── Microsoft OAuth ───────────────────────────────────────────
-    bool requestMsDeviceCode(QString& outUserCode, QString& outVerificationUrl, int& outInterval);
+    bool requestMsDeviceCode(QString& outUserCode, QString& outDeviceCode, QString& outVerificationUrl, int& outInterval);
     bool pollMsToken(const QString& deviceCode, int interval);
     bool refreshMsToken();
-    bool uploadToOneDrive(const QString& filePath, const QString& accessToken);
+    bool uploadToOneDrive(const QString& filePath, const QString& accessToken, QString& cloud_url);
+    void loadMsTokens();
+    void saveMsTokens();
 
     // ─── Google OAuth ──────────────────────────────────────────────
     bool requestGoogleDeviceCode(QString& outUserCode, QString& outVerificationUrl, int& outInterval);
     bool pollGoogleToken(const QString& deviceCode, int interval);
     bool refreshGoogleToken();
     bool uploadToDriveAPI(const QString& filePath, const QString& accessToken, QString& outFileId);
+    void loadGoogleTokens();
+    void saveGoogleTokens();
 
     // ─── Microsoft 凭据 ────────────────────────────────────────────
     static constexpr const char* MS_CLIENT_ID = "4d3c6347-8476-4090-a42e-79bb923ddcba";
@@ -51,7 +65,7 @@ private:
     static constexpr const char* MS_TOKEN_URL =
         "https://login.microsoftonline.com/common/oauth2/v2.0/token";
     static constexpr const char* MS_GRAPH_UPLOAD_URL =
-        "https://graph.microsoft.com/v1.0/me/drive/root:/%1:/content";
+        "https://graph.microsoft.com/v1.0/me/drive/root:/ForMyBaby/%1:/content";
 
     static constexpr const char* MS_SCOPE = "Files.ReadWrite offline_access";
 

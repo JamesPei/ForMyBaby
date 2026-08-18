@@ -1,9 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "database.h"
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::ForMyBaby)
+    : QMainWindow(parent), ui(new Ui::ForMyBaby)
 {
     ui->setupUi(this);
 
@@ -13,6 +13,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->photo_window->setPixmap(pixmap);
     // 调整控件大小以适应图像大小
     ui->photo_window->resize(960, 640);
+
+    ui->datetime->setDateTime(QDateTime::currentDateTime());
 
     connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::openFile);
 }
@@ -30,13 +32,16 @@ void MainWindow::openFile()
         QPixmap scaledPixmap = pixmap.scaled(960, 640, Qt::IgnoreAspectRatio);
         // 将缩放后的图片显示在 photo_window 控件中
         ui->photo_window->setPixmap(scaledPixmap);
-    }else{
+    }
+    else
+    {
         // 用户未选择任何文件，弹出警告提示
         QMessageBox::warning(this, tr("Error"), tr("Not selelct any file"));
     }
 }
 
-void MainWindow::resizeEvent(QResizeEvent *event){
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
     // QSize newSize = event->size();
     // qInfo() << "new size:" << newSize.width() << " new height:" << newSize.height();
 
@@ -68,7 +73,6 @@ void MainWindow::on_clear_button_clicked()
     ui->datetime->setDateTime(photo_time);
 }
 
-
 void MainWindow::on_save_button_clicked()
 {
     // 从UI控件中获取用户输入的数据
@@ -78,8 +82,44 @@ void MainWindow::on_save_button_clicked()
     QString datetime = ui->datetime->dateTime().toString("yyyy-MM-dd HH:mm");
     QString imagePath = curr_fileName;
 
-    utils.upload(imagePath, message, story, datetime, position);
+    qWarning() << "message:" << message;
+    qWarning() << "story:" << story;
+    qWarning() << "position:" << position;
+    qWarning() << "date:" << datetime;
+    qWarning() << "path:" << imagePath;
+
+    if (!utils.upload(imagePath, message, story, datetime, position))
+    {
+        qWarning() << "save record failed!";
+    };
 
     // 将照片路径、消息、故事、时间、地点组合保存
     // utils.combinePhoto(imagePath, message, story, datetime, position);
+}
+
+void MainWindow::on_mainWidget_currentChanged(int index)
+{
+    if (index == 1)
+    { // memory_tab 首次加载
+        if (!m_memoryTabLoaded)
+        {
+            m_memoryTabLoaded = true;
+            // 此处不会造成内存泄漏：this是MainWindow，Qt父子对象机制确保MainWindow析构时会自动删除m_photoListModel
+            m_photoListModel = new QStringListModel(this);
+        }
+        QStringList storyList;
+        for (const auto &rec : Database::instance().getAllRecords())
+        {
+            storyList << rec.datetime;
+        }
+
+        m_photoListModel->setStringList(storyList);
+        ui->photo_list->setModel(m_photoListModel);
+    }
+}
+
+void MainWindow::on_photo_list_clicked(const QModelIndex &index)
+{
+    QString story = index.data().toString();  // 获取点击的 story 文本
+    qInfo() << "Clicked:" << story;
 }

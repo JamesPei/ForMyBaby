@@ -8,11 +8,19 @@
 #include <QMimeDatabase>
 #include <QDesktopServices>
 #include <QTimer>
+#include <QMessageBox>
 #include <QDebug>
+#include <QStandardPaths>
+#include <QDir>
 
 Utils::Utils()
     : m_networkManager(new QNetworkAccessManager)
 {
+    loadMsTokens();
+    loadGoogleTokens();
+    if (!Database::instance().init()) {
+        qWarning() << "Database Init failed!";
+    }
 }
 
 Utils::~Utils()
@@ -28,13 +36,28 @@ void Utils::getPhotoByID(u_int32_t id)
 {
 }
 
-bool Utils::upload(QString file_path, QString message, QString memory, QString datetime, QString position)
+bool Utils::upload(QString file_path, QString message, QString memory, QString datetime, QString location)
 {
-    upload2Ms(file_path);
-    return false;
+    QString onedrive_url = upload2Ms(file_path);
+    qInfo() << "upload to: " << onedrive_url;
+
+    if (onedrive_url.isEmpty()) {
+        return false;
+    }
+
+    BabyRecord record;
+    record.cloudPhotoPath = onedrive_url;
+    record.message = message;
+    record.story = memory;
+    record.datetime = datetime;
+    record.location = location;
+
+    Database::instance().insertRecord(record);
+
+    return true;
 }
 
-bool Utils::combinePhoto(QString file_path, QString message, QString memory, QString datetime, QString position)
+bool Utils::combinePhoto(QString file_path, QString message, QString memory, QString datetime, QString location)
 {
     return true;
 }
@@ -48,7 +71,12 @@ bool Utils::isMsAuthenticated() const
     return !m_msAccessToken.isEmpty();
 }
 
-bool Utils::requestMsDeviceCode(QString& outUserCode, QString& outVerificationUrl, int& outInterval)
+// 向 Microsoft 设备码端点发起请求，获取用户验证码和验证URL
+// outUserCode: 用户需要在浏览器中输入的验证码
+// outDeviceCode: 用于轮询 token 的设备码
+// outVerificationUrl: 用户需要打开的验证页面地址
+// outInterval: 轮询间隔（秒），默认5秒
+bool Utils::requestMsDeviceCode(QString& outUserCode, QString& outDeviceCode, QString& outVerificationUrl, int& outInterval)
 {
     QNetworkRequest request{QUrl(QString::fromLatin1(MS_DEVICE_CODE_URL))};
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
@@ -68,25 +96,31 @@ bool Utils::requestMsDeviceCode(QString& outUserCode, QString& outVerificationUr
         return false;
     }
 
+    // Microsoft 的字段名为 verification_uri（不是 verification_url）
     QJsonObject json = QJsonDocument::fromJson(reply->readAll()).object();
     reply->deleteLater();
 
     outUserCode        = json["user_code"].toString();
-    outVerificationUrl = json["verification_url"].toString();
+    outDeviceCode      = json["device_code"].toString();
+    outVerificationUrl = json["verification_uri"].toString();
     outInterval        = json["interval"].toInt(5);
 
     return !outUserCode.isEmpty();
 }
 
+// 轮询Microsoft token端点，等待用户在浏览器中完成授权
+// 最长等待300秒，超过则超时退出
 bool Utils::pollMsToken(const QString& deviceCode, int interval)
 {
     for (int i = 0; i < 300 / interval; ++i) {
+        // 等待指定间隔后再发起下一次请求
         {
             QEventLoop waitLoop;
             QTimer::singleShot(interval * 1000, &waitLoop, &QEventLoop::quit);
             waitLoop.exec();
         }
 
+        // 用 device_code 向 token 端点发起 POST 请求
         QNetworkRequest request{QUrl(QString::fromLatin1(MS_TOKEN_URL))};
         request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 
@@ -103,12 +137,16 @@ bool Utils::pollMsToken(const QString& deviceCode, int interval)
         QJsonObject json = QJsonDocument::fromJson(reply->readAll()).object();
         reply->deleteLater();
 
+        // 用户已完成授权，保存 token
         if (json.contains("access_token")) {
             m_msAccessToken  = json["access_token"].toString();
             m_msRefreshToken = json["refresh_token"].toString();
+            saveMsTokens();
             return true;
         }
 
+        // authorization_pending: 用户尚未完成授权，继续等待
+        // slow_down: 服务器要求降低轮询频率
         QString error = json["error"].toString();
         if (error == "authorization_pending") {
             continue;
@@ -152,6 +190,7 @@ bool Utils::refreshMsToken()
         if (json.contains("refresh_token")) {
             m_msRefreshToken = json["refresh_token"].toString();
         }
+        saveMsTokens();
         return true;
     }
 
@@ -162,10 +201,11 @@ bool Utils::refreshMsToken()
 bool Utils::authenticateMs()
 {
     QString userCode;
+    QString deviceCode;
     QString verificationUrl;
     int interval;
 
-    if (!requestMsDeviceCode(userCode, verificationUrl, interval)) {
+    if (!requestMsDeviceCode(userCode, deviceCode, verificationUrl, interval)) {
         return false;
     }
 
@@ -177,10 +217,15 @@ bool Utils::authenticateMs()
 
     QDesktopServices::openUrl(QUrl(verificationUrl));
 
-    return pollMsToken(verificationUrl, interval);
+    if (!userCode.isEmpty()) {
+        QMessageBox::information(nullptr, "Microsoft验证码",
+            "在浏览器打开的页面中输入以下验证码：\n\n" + userCode);
+    }
+
+    return pollMsToken(deviceCode, interval);
 }
 
-bool Utils::uploadToOneDrive(const QString& filePath, const QString& accessToken)
+bool Utils::uploadToOneDrive(const QString& filePath, const QString& accessToken, QString& cloud_url)
 {
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly)) {
@@ -214,11 +259,15 @@ bool Utils::uploadToOneDrive(const QString& filePath, const QString& accessToken
         QJsonObject json = QJsonDocument::fromJson(responseData).object();
         QString webUrl = json["webUrl"].toString();
         qInfo() << "Utils[MS]: Upload successful:" << webUrl;
+        QMessageBox::information(nullptr, "", "上传成功");
+        cloud_url = webUrl;
         return true;
+    }else{
+        qWarning() << "Utils[MS]: Upload failed, status:" << statusCode << responseData;
+        QMessageBox::information(nullptr, "", "上传失败");
+        cloud_url = "";
+        return false;
     }
-
-    qWarning() << "Utils[MS]: Upload failed, status:" << statusCode << responseData;
-    return false;
 }
 
 QString Utils::upload2Ms(QString file_path)
@@ -242,13 +291,14 @@ QString Utils::upload2Ms(QString file_path)
         }
     }
 
-    if (!uploadToOneDrive(file_path, m_msAccessToken)) {
-        if (!refreshMsToken() || !uploadToOneDrive(file_path, m_msAccessToken)) {
+    QString cloud_url;
+    if (!uploadToOneDrive(file_path, m_msAccessToken, cloud_url)) {
+        if (!refreshMsToken() || !uploadToOneDrive(file_path, m_msAccessToken, cloud_url)) {
             return "";
         }
     }
 
-    return "onedrive://" + QFileInfo(file_path).fileName();
+    return cloud_url;
 }
 
 // ===============================================================
@@ -319,6 +369,7 @@ bool Utils::pollGoogleToken(const QString& deviceCode, int interval)
         if (json.contains("access_token")) {
             m_googleAccessToken  = json["access_token"].toString();
             m_googleRefreshToken = json["refresh_token"].toString();
+            saveGoogleTokens();
             return true;
         }
 
@@ -363,6 +414,7 @@ bool Utils::refreshGoogleToken()
 
     if (json.contains("access_token")) {
         m_googleAccessToken = json["access_token"].toString();
+        saveGoogleTokens();
         return true;
     }
 
@@ -476,4 +528,72 @@ QString Utils::upload2Google(QString file_path)
 
     qInfo() << "Utils[Google]: Upload successful, file ID:" << fileId;
     return "https://drive.google.com/file/d/" + fileId + "/view";
+}
+
+// ===============================================================
+//  Token 持久化
+// ===============================================================
+
+static QString msTokenPath()
+{
+    QString dir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QDir().mkpath(dir);
+    return dir + "/ms_tokens.json";
+}
+
+static QString googleTokenPath()
+{
+    QString dir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QDir().mkpath(dir);
+    return dir + "/google_tokens.json";
+}
+
+void Utils::loadMsTokens()
+{
+    QFile file(msTokenPath());
+    if (!file.open(QIODevice::ReadOnly)) {
+        return;
+    }
+    QJsonObject json = QJsonDocument::fromJson(file.readAll()).object();
+    file.close();
+    m_msAccessToken  = json["access_token"].toString();
+    m_msRefreshToken = json["refresh_token"].toString();
+}
+
+void Utils::saveMsTokens()
+{
+    QJsonObject json;
+    json["access_token"]  = m_msAccessToken;
+    json["refresh_token"] = m_msRefreshToken;
+
+    QFile file(msTokenPath());
+    if (file.open(QIODevice::WriteOnly)) {
+        file.write(QJsonDocument(json).toJson());
+        file.close();
+    }
+}
+
+void Utils::loadGoogleTokens()
+{
+    QFile file(googleTokenPath());
+    if (!file.open(QIODevice::ReadOnly)) {
+        return;
+    }
+    QJsonObject json = QJsonDocument::fromJson(file.readAll()).object();
+    file.close();
+    m_googleAccessToken  = json["access_token"].toString();
+    m_googleRefreshToken = json["refresh_token"].toString();
+}
+
+void Utils::saveGoogleTokens()
+{
+    QJsonObject json;
+    json["access_token"]  = m_googleAccessToken;
+    json["refresh_token"] = m_googleRefreshToken;
+
+    QFile file(googleTokenPath());
+    if (file.open(QIODevice::WriteOnly)) {
+        file.write(QJsonDocument(json).toJson());
+        file.close();
+    }
 }

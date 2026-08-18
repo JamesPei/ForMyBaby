@@ -2,6 +2,8 @@
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QDebug>
+#include <QStandardPaths>
+#include <QDir>
 
 Database& Database::instance()
 {
@@ -16,9 +18,30 @@ Database::~Database()
 
 bool Database::init(const QString& dbPath, const QString& driver)
 {
+    // 已初始化过则直接返回
+    if (m_db.isOpen()) {
+        return true;
+    }
+
+    // 自动选择系统标准路径（Linux: ~/.local/share/ForMyBaby/，macOS: ~/Library/Application Support/ForMyBaby/）
+    QString actualPath = dbPath;
+    if (actualPath.isEmpty()) {
+        // QStandardPaths::writableLocation返回一个可写入数据的标准系统目录路径，Qt会根据平台自动选择正确位置
+        // 常用type:
+        // AppDataLocation:应用持久化数据
+        // AppLocalDataLocation:应用本地数据（不同步）
+        // CacheLocation:缓存数据
+        // DesktopLocation:桌面
+        // DocumentsLocation:文档
+        // TempLocation:临时文件
+        QString dir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+        QDir().mkpath(dir);
+        actualPath = dir + "/baby.db";
+    }
+
     // 使用 Qt SQL 驱动连接数据库，默认 QSQLITE
     m_db = QSqlDatabase::addDatabase(driver);
-    m_db.setDatabaseName(dbPath);
+    m_db.setDatabaseName(actualPath);
 
     if (!m_db.open()) {
         qWarning() << "Database open failed:" << m_db.lastError().text();
@@ -34,7 +57,8 @@ bool Database::init(const QString& dbPath, const QString& driver)
         "message TEXT,"
         "story TEXT,"
         "datetime TEXT,"
-        "position TEXT"
+        "location TEXT,"
+        "insert_time TEXT"
         ")"
     );
 
@@ -57,14 +81,15 @@ int Database::insertRecord(const BabyRecord& record)
 {
     QSqlQuery query(m_db);
     query.prepare(
-        "INSERT INTO baby_records (cloud_photo_path, message, story, datetime, position) "
-        "VALUES (:cloud_photo_path, :message, :story, :datetime, :position)"
+        "INSERT INTO baby_records (cloud_photo_path, message, story, datetime, location, insert_time) "
+        "VALUES (:cloud_photo_path, :message, :story, :datetime, :location, :insert_time)"
     );
     query.bindValue(":cloud_photo_path", record.cloudPhotoPath);
     query.bindValue(":message",         record.message);
     query.bindValue(":story",           record.story);
     query.bindValue(":datetime",        record.datetime);
-    query.bindValue(":position",        record.position);
+    query.bindValue(":location",        record.location);
+    query.bindValue(":insert_time",     QDateTime::currentDateTime().toString(Qt::ISODate));
 
     if (!query.exec()) {
         qWarning() << "Insert failed:" << query.lastError().text();
@@ -83,14 +108,14 @@ bool Database::updateRecord(const BabyRecord& record)
         "message = :message, "
         "story = :story, "
         "datetime = :datetime, "
-        "position = :position "
+        "location = :location "
         "WHERE id = :id"
     );
     query.bindValue(":cloud_photo_path", record.cloudPhotoPath);
     query.bindValue(":message",          record.message);
     query.bindValue(":story",            record.story);
     query.bindValue(":datetime",         record.datetime);
-    query.bindValue(":position",         record.position);
+    query.bindValue(":location",         record.location);
     query.bindValue(":id",               record.id);
 
     if (!query.exec()) {
@@ -194,6 +219,6 @@ BabyRecord Database::rowToRecord(const QSqlQuery& query) const
     record.message        = query.value("message").toString();
     record.story          = query.value("story").toString();
     record.datetime       = query.value("datetime").toString();
-    record.position       = query.value("position").toString();
+    record.location       = query.value("location").toString();
     return record;
 }

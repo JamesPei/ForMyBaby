@@ -14,7 +14,7 @@ struct BabyRecord {
     QString message;
     QString story;
     QString datetime;
-    QString position;
+    QString location;
 };
 
 class Database {
@@ -23,7 +23,7 @@ public:
     static Database& instance();
 
     // 初始化数据库连接，默认使用SQLite
-    bool init(const QString& dbPath = "baby.db",
+    bool init(const QString& dbPath = "",
               const QString& driver = "QSQLITE");
 
     // 关闭数据库连接
