@@ -8,12 +8,14 @@ set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(TS_FILES ForMyBaby_zh_CN.ts)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -Wall -ggdb")  # 有了-ggdb就不再需要-g
+if(APPLE)
+    set(CMAKE_PREFIX_PATH "$ENV{HOME}/Qt/6.11.2/macos")
+endif()
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets LinguistTools Sql Network)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools Sql Network)
-
-set(TS_FILES ForMyBaby_zh_CN.ts)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -Wall -ggdb")  # 有了-ggdb就不再需要-g
 
 set(PROJECT_SOURCES
         main.cpp
