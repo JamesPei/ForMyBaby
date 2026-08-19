@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <QString>
+#include <QStringListModel>
+#include <QPixmap>
 #include <QFileSystemModel>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -13,6 +15,10 @@ public:
     Utils();
     ~Utils();
 
+    void getMemoryList(QStringListModel* listModel);
+
+    QHash<QString, BabyRecord>& getRecords();
+    
     void getPhotos(std::vector<u_int32_t>& photos);
 
     void getPhotoByID(u_int32_t id);
@@ -85,6 +91,8 @@ private:
     // Google tokens
     QString m_googleAccessToken;
     QString m_googleRefreshToken;
+
+    QHash<QString, BabyRecord> records;
 };
 
 #endif // UTILS_H

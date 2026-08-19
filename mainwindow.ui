@@ -41,6 +41,103 @@
       <property name="documentMode">
        <bool>true</bool>
       </property>
+      <widget class="QWidget" name="memory_tab">
+       <attribute name="title">
+        <string>回忆</string>
+       </attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,3">
+        <property name="spacing">
+         <number>16</number>
+        </property>
+        <property name="leftMargin">
+         <number>12</number>
+        </property>
+        <property name="topMargin">
+         <number>12</number>
+        </property>
+        <property name="rightMargin">
+         <number>12</number>
+        </property>
+        <property name="bottomMargin">
+         <number>12</number>
+        </property>
+        <item>
+         <widget class="QGroupBox" name="memoryListGroupBox">
+          <property name="minimumSize">
+           <size>
+            <width>220</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="title">
+           <string>记录列表</string>
+          </property>
+          <layout class="QVBoxLayout" name="memoryListLayout">
+           <item>
+            <widget class="QListView" name="photo_list">
+             <property name="alternatingRowColors">
+              <bool>true</bool>
+             </property>
+             <property name="selectionMode">
+              <enum>QAbstractItemView::SingleSelection</enum>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="memoryPreviewGroupBox">
+          <property name="title">
+           <string>照片预览</string>
+          </property>
+          <layout class="QVBoxLayout" name="memoryPreviewLayout" stretch="12,1">
+           <item>
+            <widget class="QLabel" name="photo_window2">
+             <property name="minimumSize">
+              <size>
+               <width>480</width>
+               <height>320</height>
+              </size>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::StyledPanel</enum>
+             </property>
+             <property name="text">
+              <string>从左侧选择一条记录</string>
+             </property>
+             <property name="scaledContents">
+              <bool>false</bool>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="photo_text">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>30</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>从左侧选择一条记录</string>
+             </property>
+             <property name="wordWrap">
+              <bool>true</bool>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="record_tab">
        <attribute name="title">
         <string>记录</string>
@@ -315,84 +412,6 @@
               </widget>
              </item>
             </layout>
-           </item>
-          </layout>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="memory_tab">
-       <attribute name="title">
-        <string>回忆</string>
-       </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,3">
-        <property name="spacing">
-         <number>16</number>
-        </property>
-        <property name="leftMargin">
-         <number>12</number>
-        </property>
-        <property name="topMargin">
-         <number>12</number>
-        </property>
-        <property name="rightMargin">
-         <number>12</number>
-        </property>
-        <property name="bottomMargin">
-         <number>12</number>
-        </property>
-        <item>
-         <widget class="QGroupBox" name="memoryListGroupBox">
-          <property name="minimumSize">
-           <size>
-            <width>220</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="title">
-           <string>记录列表</string>
-          </property>
-          <layout class="QVBoxLayout" name="memoryListLayout">
-           <item>
-            <widget class="QListView" name="photo_list">
-             <property name="alternatingRowColors">
-              <bool>true</bool>
-             </property>
-             <property name="selectionMode">
-              <enum>QAbstractItemView::SingleSelection</enum>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item>
-         <widget class="QGroupBox" name="memoryPreviewGroupBox">
-          <property name="title">
-           <string>照片预览</string>
-          </property>
-          <layout class="QVBoxLayout" name="memoryPreviewLayout">
-           <item>
-            <widget class="QLabel" name="photo_window2">
-             <property name="minimumSize">
-              <size>
-               <width>480</width>
-               <height>320</height>
-              </size>
-             </property>
-             <property name="frameShape">
-              <enum>QFrame::StyledPanel</enum>
-             </property>
-             <property name="text">
-              <string>从左侧选择一条记录</string>
-             </property>
-             <property name="scaledContents">
-              <bool>true</bool>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
            </item>
           </layout>
          </widget>

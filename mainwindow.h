@@ -40,8 +40,6 @@ private:
     Ui::ForMyBaby *ui;
     QString curr_fileName;
     Utils utils;
-    bool m_memoryTabLoaded = false;          // 标记 memory_tab 是否已加载过数据
     QStringListModel* m_photoListModel = nullptr;  // photo_list 的数据模型
-    QHash<QString, BabyRecord> records;
 };
 #endif // MAINWINDOW_H

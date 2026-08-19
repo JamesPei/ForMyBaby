@@ -1,12 +1,14 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "database.h"
+#include <QProgressDialog>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::ForMyBaby)
 {
     ui->setupUi(this);
 
+    // load record_tab
     QPixmap pixmap(":/static_resource/no-image.jpg");
     pixmap.scaled(960, 640, Qt::IgnoreAspectRatio);
     // 将图像设置为QLabel的背景
@@ -15,6 +17,11 @@ MainWindow::MainWindow(QWidget *parent)
     ui->photo_window->resize(960, 640);
 
     ui->datetime->setDateTime(QDateTime::currentDateTime());
+
+    // load memory_tab
+    m_photoListModel = new QStringListModel(this);
+    utils.getMemoryList(m_photoListModel);
+    ui->photo_list->setModel(m_photoListModel);
 
     connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::openFile);
 }
@@ -88,10 +95,18 @@ void MainWindow::on_save_button_clicked()
     qWarning() << "date:" << datetime;
     qWarning() << "path:" << imagePath;
 
+
+    // 显示不定进度条
+    QProgressDialog progress(tr("正在上传…"), QString(), 0, 0, this);
+    progress.setWindowModality(Qt::WindowModal);   
+    progress.setCancelButton(nullptr);             
+    progress.setMinimumDuration(0);                
+    progress.show();
     if (!utils.upload(imagePath, message, story, datetime, position))
     {
         qWarning() << "save record failed!";
     };
+    progress.close();                              // 下载完成，关闭转轮
 
     // 将照片路径、消息、故事、时间、地点组合保存
     // utils.combinePhoto(imagePath, message, story, datetime, position);
@@ -99,32 +114,9 @@ void MainWindow::on_save_button_clicked()
 
 void MainWindow::on_mainWidget_currentChanged(int index)
 {
-    if (index == 1)
+    if (index == 0)     // 0 = memory_tab（回忆页）
     { 
-        if (!m_memoryTabLoaded)
-        {
-            m_memoryTabLoaded = true;
-            // 此处不会造成内存泄漏：this是MainWindow，Qt父子对象机制确保MainWindow析构时会自动删除m_photoListModel
-            m_photoListModel = new QStringListModel(this);
-        }
-        QStringList storyList;
-        for (const auto &rec : Database::instance().getAllRecords())
-        {
-            QString record_id = QString::number(rec.id) + "_" + rec.datetime;
-            qInfo() << record_id;
-
-            BabyRecord temp_record;
-            temp_record.cloudPhotoPath = rec.cloudPhotoPath;
-            temp_record.story = rec.story;
-            temp_record.message = rec.message;
-            temp_record.datetime = rec.datetime;
-            temp_record.location = rec.location; 
-
-            records.insert(record_id, temp_record);
-            storyList << record_id;
-        }
-
-        m_photoListModel->setStringList(storyList);
+        utils.getMemoryList(m_photoListModel);
         ui->photo_list->setModel(m_photoListModel);
     }
 }
@@ -134,9 +126,37 @@ void MainWindow::on_photo_list_clicked(const QModelIndex &index)
     QString record_id = index.data().toString();
     qInfo() << "Clicked:" << record_id;
 
-    BabyRecord record = records[record_id];
+    const auto &records = utils.getRecords();
+
+    if (!records.contains(record_id)) {
+        qWarning() << "record not found:" << record_id;
+        return;
+    }
+    // value(key):返回对应值;使用operator[]有潜在风险，key不存在时会自动插入
+    // 一个默认构造的值，然后返回它（会修改哈希表）
+    BabyRecord record = records.value(record_id);
     QString cloud_photo_path = record.cloudPhotoPath;
     qInfo() << "cloud_photo_path:" << cloud_photo_path;
+
+    // 在 photo_text 中显示记录的文字内容：先时间地点，再故事、留言
+    ui->photo_text->setText(QStringLiteral("%1 · %2 故事: %3   留言: %4")
+                                .arg(record.datetime, record.location,
+                                     record.story, record.message));
+
+    // 下载照片耗时较长，显示不定进度条（转轮）提示用户正在执行
+    QProgressDialog progress(tr("正在加载照片…"), QString(), 0, 0, this);
+    progress.setWindowModality(Qt::WindowModal);   // 模态，防止下载期间重复点击
+    progress.setCancelButton(nullptr);             // 禁止取消
+    progress.setMinimumDuration(0);                // 立即显示（默认要等 4s）
+    progress.show();
+
     QPixmap photo = utils.getPhotoByURL(cloud_photo_path);
-    ui->photo_window2->setPixmap(photo);
+
+    progress.close();                              // 下载完成，关闭转轮
+    // 保持宽高比缩放图片以适配 photo_window2
+    if (!photo.isNull()) {
+        ui->photo_window2->setPixmap(photo.scaled(ui->photo_window2->size(),
+                                                  Qt::KeepAspectRatio,
+                                                  Qt::SmoothTransformation));
+    }
 }

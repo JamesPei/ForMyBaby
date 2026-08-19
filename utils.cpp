@@ -28,6 +28,35 @@ Utils::~Utils()
     delete m_networkManager;
 }
 
+QHash<QString, BabyRecord>& Utils::getRecords(){
+    return records;
+};
+
+void Utils::getMemoryList(QStringListModel* listModel){
+    QStringList storyList;
+    for (const auto &rec : Database::instance().getAllRecords())
+    {
+        QString record_id = QString::number(rec.id) + "_" + rec.datetime;
+        qInfo() << record_id;
+
+        // 仅当 records 中不存在该 record_id 时才插入，避免重复覆盖
+        if (!records.contains(record_id))
+        {
+            BabyRecord temp_record;
+            temp_record.cloudPhotoPath = rec.cloudPhotoPath;
+            temp_record.story = rec.story;
+            temp_record.message = rec.message;
+            temp_record.datetime = rec.datetime;
+            temp_record.location = rec.location;
+
+            records.insert(record_id, temp_record);
+        }
+        storyList << record_id;
+    }
+
+    listModel->setStringList(storyList);
+};
+
 void Utils::getPhotos(std::vector<u_int32_t>& photos)
 {
 }
