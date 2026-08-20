@@ -73,8 +73,15 @@ set_target_properties(ForMyBaby PROPERTIES
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE TRUE
+    MACOSX_BUNDLE_ICON_FILE FMB.icns
     WIN32_EXECUTABLE TRUE
 )
+
+# macOS 应用图标：把FMB.icns打包进.app/Contents/Resources（供Info.plist的CFBundleIconFile引用）
+if(APPLE)
+    target_sources(ForMyBaby PRIVATE FMB.icns)
+    set_source_files_properties(FMB.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+endif()
 
 include(GNUInstallDirs)
 install(TARGETS ForMyBaby

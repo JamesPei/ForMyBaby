@@ -456,7 +456,7 @@
         <item alignment="Qt::AlignHCenter">
          <widget class="QLabel" name="aboutDescriptionLabel">
           <property name="text">
-           <string>珍藏照片、故事与成长中的每一个瞬间</string>
+           <string>珍藏照片、故事与成长中的每一个瞬间&#xA;献给贝果</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>

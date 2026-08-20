@@ -1,7 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>static_resource/no-image.jpg</file>
-        <file>static_resource/FMB_splash.jpeg</file>
+        <file>static_resource/FMB_splash.jpg</file>
     </qresource>
     <qresource prefix="/new/images"/>
 </RCC>

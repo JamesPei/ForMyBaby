@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     }
 
     // 启动画面，停留 0.5s 后显示主窗口
-    QPixmap pixmap(":/static_resource/FMB_splash.jpeg");
+    QPixmap pixmap(":/static_resource/FMB_splash.jpg");
     // 缩放至屏幕的 80%（保持宽高比），避免竖屏大图超出桌面屏幕
     const QSize target = QGuiApplication::primaryScreen()->availableGeometry().size() * 0.8;
     const QPixmap scaledPixmap = pixmap.scaled(target, Qt::KeepAspectRatio, Qt::SmoothTransformation);
